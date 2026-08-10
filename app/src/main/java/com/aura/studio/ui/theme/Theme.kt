@@ -7,29 +7,33 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
+private val DarkColors = darkColorScheme(
     primary = Color(0xFFE91E63),
     secondary = Color(0xFF9C27B0),
-    tertiary = Color(0xFFFF4081),
     background = Color(0xFF121212),
-    surface = Color(0xFF1E1E1E)
+    surface = Color(0xFF1E1E1E),
+    onPrimary = Color.White,
+    onBackground = Color.White,
+    onSurface = Color.White
 )
 
-private val LightColorScheme = lightColorScheme(
+private val LightColors = lightColorScheme(
     primary = Color(0xFFE91E63),
     secondary = Color(0xFF9C27B0),
-    tertiary = Color(0xFFFF4081)
+    background = Color(0xFFFFFBFE),
+    surface = Color.White,
+    onPrimary = Color.White,
+    onBackground = Color.Black,
+    onSurface = Color.Black
 )
 
 @Composable
-fun AuraStudioTheme(
+fun AuraTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (darkTheme) DarkColors else LightColors,
         content = content
     )
 }

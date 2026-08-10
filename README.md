@@ -1,40 +1,51 @@
-# Aura Studio
+# Aura Studio - Avatar Creator
 
-Local-first Android app for designing sexy AI model avatars and generating pictures.
+Lite, focused Android app for designing custom sexy AI avatars.
 
-## Current Features
-- Full Avatar Creator (age, body, breasts, ethnicity, eyes, hair, skin, clothing / nude)
-- Live prompt generation
-- Room database persistence
-- Avatar list with create / edit / delete
-- Main home screen
-- Generate screen (prompt ready, image gen placeholder)
-- Navigation between all screens
+## What works right now
+
+- Create detailed avatars (age 18+, body, breasts, ethnicity, eyes, hair, skin, clothing / nude)
+- Live prompt preview
+- Save / edit / delete avatars (Room)
+- List screen + Creator screen + Detail screen
+- Full navigation between screens
 - Hilt + ViewModel + Compose
-
-## How to run
-1. Open in Android Studio
-2. Sync Gradle
-3. Run on device/emulator
+- Dark / light theme
 
 ## Project structure
+
 ```
 app/src/main/java/com/aura.studio/
+├── AuraApp.kt
 ├── MainActivity.kt
-├── AuraStudioApp.kt
-├── avatar/AvatarSpec.kt
-├── data/ (Room + Repository)
-├── di/DatabaseModule.kt
+├── avatar/
+│   └── AvatarSpec.kt
+├── data/
+│   ├── AvatarEntity.kt
+│   ├── AvatarDao.kt
+│   ├── AppDatabase.kt
+│   └── AvatarRepository.kt
+├── di/
+│   └── DatabaseModule.kt
 └── ui/
-    ├── AuraNavHost.kt
-    ├── MainScreen.kt
+    ├── AuraNavGraph.kt
     ├── AvatarListScreen.kt
     ├── AvatarCreatorScreen.kt
-    ├── GenerateScreen.kt
+    ├── AvatarDetailScreen.kt
+    ├── AvatarViewModel.kt
     └── theme/Theme.kt
 ```
 
-## Next
-- Wire real image generation
+## How to run
+
+1. Open in Android Studio
+2. Sync Gradle
+3. Run on device / emulator
+
+## Next (when ready)
+
+- Real image generation from the prompt
 - Video generation later
-- Chat / roleplay
+- Chat with the avatar
+
+No Swarm / background worker code included — kept deliberately simple.
