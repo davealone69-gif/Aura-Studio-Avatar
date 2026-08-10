@@ -13,7 +13,9 @@ object Routes {
     const val LIST = "list"
     const val CREATE = "create"
     const val EDIT = "edit/{id}"
+    const val DETAIL = "detail/{id}"
     fun edit(id: String) = "edit/$id"
+    fun detail(id: String) = "detail/$id"
 }
 
 @Composable
@@ -29,7 +31,7 @@ fun AuraNavGraph(
             AvatarListScreen(
                 viewModel = viewModel,
                 onCreateNew = { navController.navigate(Routes.CREATE) },
-                onEdit = { avatar -> navController.navigate(Routes.edit(avatar.id)) }
+                onOpen = { avatar -> navController.navigate(Routes.detail(avatar.id)) }
             )
         }
 
@@ -58,6 +60,23 @@ fun AuraNavGraph(
                     navController.popBackStack()
                 },
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Routes.DETAIL,
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: return@composable
+            val avatar = viewModel.avatars.value.find { it.id == id } ?: return@composable
+
+            AvatarDetailScreen(
+                avatar = avatar,
+                onEdit = { navController.navigate(Routes.edit(avatar.id)) },
+                onBack = { navController.popBackStack() },
+                onGenerate = {
+                    // Placeholder for future real generation
+                }
             )
         }
     }

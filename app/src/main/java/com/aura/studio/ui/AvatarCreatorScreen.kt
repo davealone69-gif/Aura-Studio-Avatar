@@ -32,7 +32,7 @@ fun AvatarCreatorScreen(
 
     val currentSpec = AvatarSpec(
         id = initial.id,
-        name = name,
+        name = name.ifBlank { "Unnamed" },
         age = age.toIntOrNull()?.coerceIn(18, 45) ?: 22,
         ethnicity = ethnicity,
         bodyType = bodyType,
@@ -49,12 +49,15 @@ fun AvatarCreatorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Avatar Creator") },
+                title = { Text(if (initial.name == "New Girl") "New Avatar" else "Edit Avatar") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("Back") }
+                    TextButton(onClick = onBack) { Text("Cancel") }
                 },
                 actions = {
-                    TextButton(onClick = { onSave(currentSpec) }) {
+                    TextButton(
+                        onClick = { onSave(currentSpec) },
+                        enabled = name.isNotBlank()
+                    ) {
                         Text("Save")
                     }
                 }
@@ -64,11 +67,13 @@ fun AvatarCreatorScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Spacer(modifier = Modifier.height(4.dp))
+
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -80,10 +85,13 @@ fun AvatarCreatorScreen(
             OutlinedTextField(
                 value = age,
                 onValueChange = { if (it.length <= 2) age = it.filter { c -> c.isDigit() } },
-                label = { Text("Age (18+)") },
+                label = { Text("Age (18–45)") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                supportingText = { Text("Must be 18 or older") }
             )
+
+            Text("Physical", style = MaterialTheme.typography.titleSmall)
 
             DropdownField("Ethnicity", ethnicity, AvatarOptions.ethnicities) { ethnicity = it }
             DropdownField("Body Type", bodyType, AvatarOptions.bodyTypes) { bodyType = it }
@@ -93,41 +101,69 @@ fun AvatarCreatorScreen(
             DropdownField("Hair Style", hairStyle, AvatarOptions.hairStyles) { hairStyle = it }
             DropdownField("Skin Tone", skinTone, AvatarOptions.skinTones) { skinTone = it }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("No Clothes (Nude)", style = MaterialTheme.typography.bodyLarge)
-                Switch(
-                    checked = isNude,
-                    onCheckedChange = { isNude = it }
+            HorizontalDivider()
+
+            // Nude toggle — main feature
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isNude)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant
                 )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text("No Clothes", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            if (isNude) "Fully nude mode active" else "Clothed mode",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Switch(
+                        checked = isNude,
+                        onCheckedChange = { isNude = it }
+                    )
+                }
             }
 
             if (!isNude) {
-                DropdownField("Clothing", clothing, AvatarOptions.clothing.filter { it != "None" }) {
-                    clothing = it
-                }
+                DropdownField(
+                    "Clothing",
+                    clothing,
+                    AvatarOptions.clothing.filter { it != "None" }
+                ) { clothing = it }
             }
 
             OutlinedTextField(
                 value = extra,
                 onValueChange = { extra = it },
-                label = { Text("Extra (tattoos, makeup, etc.)") },
+                label = { Text("Extra details (tattoos, makeup, piercings...)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2
             )
 
-            Divider()
+            HorizontalDivider()
 
-            Text("Prompt Preview", style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = currentSpec.toPrompt(),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+            Text("Live Prompt", style = MaterialTheme.typography.titleSmall)
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = currentSpec.toPrompt(),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

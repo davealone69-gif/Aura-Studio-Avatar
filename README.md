@@ -1,32 +1,39 @@
-# Aura Studio - Avatar Creator
+# Aura Studio
 
-Lite, focused Android app for designing custom sexy AI avatars.
+Focused Android app for designing custom sexy AI model avatars.
 
-## What works right now
+## Current features (working)
 
-- Create detailed avatars (age 18+, body, breasts, ethnicity, eyes, hair, skin, clothing / nude)
-- Live prompt preview
-- Save / edit / delete avatars (Room)
-- List screen + Creator screen + Detail screen
-- Full navigation between screens
-- Hilt + ViewModel + Compose
-- Dark / light theme
+- **Avatar Creator** with full controls:
+  - Name, Age (18+ only)
+  - Ethnicity, Body type, Breast size
+  - Eye colour, Hair colour & style, Skin tone
+  - **No Clothes (Nude) toggle**
+  - Extra details (tattoos, makeup, etc.)
+  - Live prompt preview
+- **Avatar List** — create, open, delete
+- **Avatar Detail** — view all settings + prompt + Generate button (placeholder)
+- Full navigation flow: List → Create / Detail → Edit
+- Room persistence (survives app restart)
+- Hilt + ViewModel + Jetpack Compose
+- Dark / light theme with pink accent
 
-## Project structure
+## How to run
+
+1. Clone: `git clone https://github.com/davealone69-gif/Aura-Studio-Avatar.git`
+2. Open in Android Studio
+3. Sync Gradle
+4. Run on device or emulator
+
+## Project layout
 
 ```
-app/src/main/java/com/aura.studio/
+app/src/main/java/com/aura/studio/
 ├── AuraApp.kt
 ├── MainActivity.kt
-├── avatar/
-│   └── AvatarSpec.kt
-├── data/
-│   ├── AvatarEntity.kt
-│   ├── AvatarDao.kt
-│   ├── AppDatabase.kt
-│   └── AvatarRepository.kt
-├── di/
-│   └── DatabaseModule.kt
+├── avatar/AvatarSpec.kt
+├── data/ (Room)
+├── di/DatabaseModule.kt
 └── ui/
     ├── AuraNavGraph.kt
     ├── AvatarListScreen.kt
@@ -36,16 +43,7 @@ app/src/main/java/com/aura.studio/
     └── theme/Theme.kt
 ```
 
-## How to run
+## Status
 
-1. Open in Android Studio
-2. Sync Gradle
-3. Run on device / emulator
-
-## Next (when ready)
-
-- Real image generation from the prompt
-- Video generation later
-- Chat with the avatar
-
-No Swarm / background worker code included — kept deliberately simple.
+Core avatar design + save/load loop is complete and usable.
+Image generation button is present as a placeholder for the next stage.
