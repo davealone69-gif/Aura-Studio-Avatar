@@ -44,7 +44,6 @@ fun AvatarDetailScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Header card
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -52,10 +51,7 @@ fun AvatarDetailScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        avatar.name,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
+                    Text(avatar.name, style = MaterialTheme.typography.headlineSmall)
                     Text(
                         if (avatar.isNude) "Fully Nude Model" else "Clothed Model",
                         style = MaterialTheme.typography.bodyMedium,
@@ -79,9 +75,8 @@ fun AvatarDetailScreen(
                 DetailRow("Extra Details", avatar.extra)
             }
 
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // Prompt section
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
