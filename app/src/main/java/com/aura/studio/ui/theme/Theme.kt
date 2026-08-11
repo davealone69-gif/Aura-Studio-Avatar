@@ -3,37 +3,48 @@ package com.aura.studio.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFFE91E63),
-    secondary = Color(0xFF9C27B0),
-    background = Color(0xFF121212),
-    surface = Color(0xFF1E1E1E),
-    onPrimary = Color.White,
-    onBackground = Color.White,
-    onSurface = Color.White
-)
+val CyberBg = Color(0xFF05070C)
+val CyberSurface = Color(0xFF0B0F18)
+val CyberSurfaceElevated = Color(0xFF121826)
+val CyberPanel = Color(0xFF0F1524)
+val CyberCyan = Color(0xFF00F0FF)
+val CyberCyanDim = Color(0xFF00A8B8)
+val CyberMagenta = Color(0xFFFF2BD6)
+val CyberPurple = Color(0xFF7B5CFF)
+val CyberText = Color(0xFFE8F0FF)
+val CyberTextDim = Color(0xFF8A9BB8)
+val CyberBorder = Color(0xFF1A1F2A)
+val CyberGlass = Color(0x14FFFFFF)
+val CyberError = Color(0xFFFF4D6A)
+val CyberSuccess = Color(0xFF00E5A0)
 
-private val LightColors = lightColorScheme(
-    primary = Color(0xFFE91E63),
-    secondary = Color(0xFF9C27B0),
-    background = Color(0xFFFFFBFE),
-    surface = Color.White,
-    onPrimary = Color.White,
-    onBackground = Color.Black,
-    onSurface = Color.Black
+private val CyberDarkScheme = darkColorScheme(
+    primary = CyberCyan,
+    onPrimary = CyberBg,
+    secondary = CyberMagenta,
+    onSecondary = CyberBg,
+    tertiary = CyberPurple,
+    background = CyberBg,
+    onBackground = CyberText,
+    surface = CyberSurface,
+    onSurface = CyberText,
+    surfaceVariant = CyberPanel,
+    onSurfaceVariant = CyberTextDim,
+    outline = CyberBorder,
+    error = CyberError,
+    onError = CyberText
 )
 
 @Composable
 fun AuraTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
+        colorScheme = CyberDarkScheme,
         content = content
     )
 }
