@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AuraStudio" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/cyber_bg</item>
+        <item name="android:navigationBarColor">@color/cyber_bg</item>
+        <item name="android:windowBackground">@color/cyber_bg</item>
+        <item name="android:colorPrimary">@color/cyber_cyan</item>
+        <item name="android:colorAccent">@color/cyber_magenta</item>
+    </style>
+</resources>

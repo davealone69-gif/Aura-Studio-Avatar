@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="cyber_bg">#05070C</color>
+    <color name="cyber_surface">#0B0F18</color>
+    <color name="cyber_surface_elevated">#121826</color>
+    <color name="cyber_panel">#0F1524</color>
+    <color name="cyber_cyan">#00F0FF</color>
+    <color name="cyber_cyan_dim">#00A8B8</color>
+    <color name="cyber_magenta">#FF2BD6</color>
+    <color name="cyber_purple">#7B5CFF</color>
+    <color name="cyber_text">#E8F0FF</color>
+    <color name="cyber_text_dim">#8A9BB8</color>
+    <color name="cyber_border">#1A1F2A</color>
+    <color name="cyber_glass">#14FFFFFF</color>
+    <color name="cyber_error">#FF4D6A</color>
+    <color name="cyber_success">#00E5A0</color>
+</resources>

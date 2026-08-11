@@ -1,34 +1,39 @@
-# Aura Studio
+# Aura Studio — Local Avatar Designer
 
-Focused Android app for designing custom sexy AI model avatars and preparing them for image generation.
+Dark futuristic Android app for designing explicit AI avatars and preparing them for **local** image & text-to-video generation.
 
-## Working features
+## Features
 
-- **Avatar Creator**
-  - Name, Age (18–45 only)
-  - Ethnicity, Body type, Breast size
-  - Eye colour, Hair colour & style, Skin tone
-  - **No Clothes (Nude) toggle**
-  - Extra details field
-  - Live prompt preview
-
-- **Avatar List** — create, open, delete with nice empty state
-- **Avatar Detail** — full summary + show/hide prompt
-- **Generate screen** — shows final prompt, one-tap copy to clipboard, Generate button (placeholder ready for real API)
-- Full navigation: List → Detail → Generate / Edit / Create
+- **Avatar Designer** — full dark cyber UI with left/right micro-panels, hologram-style preview, glass bottom dock
+- **Strong Nude toggle** — one-tap “No Clothes” control
+- Full body / face / hair / outfit / pose / expression / effects control
+- **Live unfiltered prompt** built from all settings
+- **Local model registry** — register your own model files (no cloud tokens)
+- Image + Text-to-Video generation modes
 - Room persistence
 - Hilt + ViewModel + Compose
-- Dark / light theme
 
-## Run it
+## Design language
 
-```bash
-git clone https://github.com/davealone69-gif/Aura-Studio-Avatar.git
-```
-
-Open in Android Studio → Sync → Run.
+- Background `#05070C`
+- Neon cyan `#00F0FF` + magenta accents
+- Glassmorphism panels + subtle grid
+- Micro-animations ready
 
 ## Status
 
-Core avatar design + save/load + prompt export is complete.
-Image generation is intentionally left as a clean placeholder so you can plug in any model/API later without rewriting the UI.
+- Core designer UI + navigation + data layer complete
+- Generation screen ready for local backend wiring (stable-diffusion.cpp / LiteRT / MNN / etc.)
+- Model manager scaffold in place
+
+## Run
+
+Open in Android Studio → Sync → Run.
+
+Requires Android Studio with recent AGP + Kotlin + Compose.
+
+## Notes
+
+- Age range locked 18–45
+- No content guardrails in the prompt path
+- All generation is designed to stay on-device
