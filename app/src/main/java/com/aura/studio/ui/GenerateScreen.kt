@@ -62,23 +62,14 @@ fun GenerateScreen(avatar: AvatarSpec, onBack: () -> Unit) {
                 navigationIcon = { TextButton(onClick = onBack) { Text("Back", color = CyberCyan) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = CyberSurface)
             )
-            Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(CyberPanel)
-                        .border(1.dp, CyberBorder, RoundedCornerShape(12.dp)).padding(4.dp)
-                ) {
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(CyberPanel).border(1.dp, CyberBorder, RoundedCornerShape(12.dp)).padding(4.dp)) {
                     listOf(0 to (Icons.Default.Image to "IMAGE"), 1 to (Icons.Default.Videocam to "VIDEO")).forEach { (m, pair) ->
                         val (icon, label) = pair
                         val selected = mode == m
                         Row(
-                            Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
-                                .background(if (selected) CyberCyan.copy(0.2f) else CyberPanel)
-                                .clickable { mode = m }.padding(vertical = 10.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                            Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(if (selected) CyberCyan.copy(0.2f) else CyberPanel).clickable { mode = m }.padding(vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(icon, null, tint = if (selected) CyberCyan else CyberTextDim, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
@@ -86,9 +77,7 @@ fun GenerateScreen(avatar: AvatarSpec, onBack: () -> Unit) {
                         }
                     }
                 }
-
                 Text(if (mode == 0) "Local Image Generation" else "Local Text-to-Video", color = CyberCyan, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-
                 Card(colors = CardDefaults.cardColors(containerColor = CyberPanel), modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(14.dp)) {
                         Text(currentPrompt, color = CyberText, fontSize = 13.sp)
@@ -108,13 +97,12 @@ fun GenerateScreen(avatar: AvatarSpec, onBack: () -> Unit) {
                         }
                     }
                 }
-
                 OutlinedButton(
                     onClick = {
                         scope.launch {
                             isEnhancing = true
                             status = "Enhancing with Dolphin…"
-                            llm.load(LocalModel("Dolphin 3.0", ModelType.LLM, "/sdcard/Models/dolphin.gguf"))
+                            llm.load(LocalModel(name = "Dolphin 3.0", type = ModelType.LLM, path = "/sdcard/Models/dolphin.gguf"))
                             val system = if (mode == 0) PromptTemplates.AVATAR_SYSTEM else PromptTemplates.VIDEO_MOTION
                             currentPrompt = llm.generate(system, currentPrompt)
                             status = "Prompt enhanced"
@@ -136,7 +124,6 @@ fun GenerateScreen(avatar: AvatarSpec, onBack: () -> Unit) {
                         Text("Enhance with Dolphin")
                     }
                 }
-
                 Button(
                     onClick = {
                         scope.launch {
@@ -144,12 +131,12 @@ fun GenerateScreen(avatar: AvatarSpec, onBack: () -> Unit) {
                             resultBitmap = null
                             if (mode == 0) {
                                 status = "Generating image…"
-                                imageEngine.load(LocalModel("Local SD", ModelType.IMAGE, "/sdcard/Models/sd.safetensors"))
+                                imageEngine.load(LocalModel(name = "Local SD", type = ModelType.IMAGE, path = "/sdcard/Models/sd.safetensors"))
                                 resultBitmap = imageEngine.generate(currentPrompt)
                                 status = if (resultBitmap != null) "Image ready" else "Generation failed"
                             } else {
                                 status = "Generating video…"
-                                videoEngine.load(LocalModel("Local Video", ModelType.VIDEO, "/sdcard/Models/video.gguf"))
+                                videoEngine.load(LocalModel(name = "Local Video", type = ModelType.VIDEO, path = "/sdcard/Models/video.gguf"))
                                 val path = videoEngine.generate(currentPrompt)
                                 status = if (path != null) "Video ready: $path" else "Video native not linked"
                             }
@@ -167,26 +154,18 @@ fun GenerateScreen(avatar: AvatarSpec, onBack: () -> Unit) {
                         Text("Generating…")
                     } else Text(if (mode == 0) "GENERATE IMAGE" else "GENERATE VIDEO")
                 }
-
                 Text(status, color = CyberTextDim, fontSize = 12.sp)
-
                 resultBitmap?.let { bmp ->
                     Text("RESULT", color = CyberCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     Image(
-                        bitmap = bmp.asImageBitmap(),
-                        contentDescription = "Generated",
-                        modifier = Modifier.fillMaxWidth()
-                            .aspectRatio(bmp.width.toFloat() / bmp.height.coerceAtLeast(1))
-                            .clip(RoundedCornerShape(12.dp))
-                            .border(1.dp, CyberBorder, RoundedCornerShape(12.dp)),
+                        bitmap = bmp.asImageBitmap(), contentDescription = "Generated",
+                        modifier = Modifier.fillMaxWidth().aspectRatio(bmp.width.toFloat() / bmp.height.coerceAtLeast(1))
+                            .clip(RoundedCornerShape(12.dp)).border(1.dp, CyberBorder, RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Fit
                     )
                     Button(
                         onClick = {
-                            val ok = MediaStoreHelper.saveBitmap(
-                                context, bmp,
-                                "aura_${avatar.name.replace(" ", "_")}_${System.currentTimeMillis()}.png"
-                            )
+                            val ok = MediaStoreHelper.saveBitmap(context, bmp, "aura_${avatar.name.replace(" ", "_")}_${System.currentTimeMillis()}.png")
                             Toast.makeText(context, if (ok) "Saved to Pictures/AuraStudio" else "Save failed", Toast.LENGTH_SHORT).show()
                             if (ok) status = "Saved to gallery"
                         },
