@@ -17,7 +17,11 @@ class AvatarViewModel @Inject constructor(
 ) : ViewModel() {
 
     val avatars: StateFlow<List<AvatarSpec>> = repo.getAll()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     fun save(spec: AvatarSpec) {
         viewModelScope.launch { repo.save(spec) }
@@ -25,5 +29,9 @@ class AvatarViewModel @Inject constructor(
 
     fun delete(id: String) {
         viewModelScope.launch { repo.delete(id) }
+    }
+
+    fun clearAll() {
+        viewModelScope.launch { repo.clear() }
     }
 }

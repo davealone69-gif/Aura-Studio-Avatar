@@ -23,4 +23,12 @@ class AvatarRepository @Inject constructor(
     suspend fun delete(id: String) {
         dao.deleteById(id)
     }
+
+    suspend fun delete(spec: AvatarSpec) {
+        dao.delete(AvatarEntity.fromSpec(spec))
+    }
+
+    suspend fun clear() {
+        dao.deleteAll()
+    }
 }
