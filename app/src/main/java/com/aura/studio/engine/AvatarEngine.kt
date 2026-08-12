@@ -1,11 +1,8 @@
 package com.aura.studio.engine
 
+import com.aura.studio.ai.DolphinService
 import com.aura.studio.avatar.AvatarSpec
 import com.aura.studio.data.AvatarRepository
-import com.aura.studio.generation.DolphinLlmEngine
-import com.aura.studio.generation.PromptTemplates
-import com.aura.studio.model.LocalModel
-import com.aura.studio.model.ModelType
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,7 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class AvatarEngine @Inject constructor(
     private val repo: AvatarRepository,
-    private val llm: DolphinLlmEngine
+    private val dolphin: DolphinService
 ) {
     fun observeAll(): Flow<List<AvatarSpec>> = repo.getAll()
     suspend fun get(id: String) = repo.getById(id)
@@ -21,13 +18,6 @@ class AvatarEngine @Inject constructor(
     suspend fun delete(id: String) = repo.delete(id)
     fun buildPrompt(spec: AvatarSpec) = spec.toPrompt()
     fun buildVideoPrompt(spec: AvatarSpec) = spec.toVideoPrompt()
-    suspend fun opinion(seedHint: String = ""): AvatarSpec {
-        llm.load(LocalModel(name = "Dolphin", type = ModelType.LLM, path = "/sdcard/Models/dolphin.gguf"))
-        return llm.opinion(seedHint)
-    }
-    suspend fun enhance(prompt: String, forVideo: Boolean = false): String {
-        llm.load(LocalModel(name = "Dolphin", type = ModelType.LLM, path = "/sdcard/Models/dolphin.gguf"))
-        val system = if (forVideo) PromptTemplates.VIDEO_MOTION else PromptTemplates.AVATAR_SYSTEM
-        return llm.generate(system, prompt)
-    }
+    suspend fun opinion(seedHint: String = "") = dolphin.opinion(seedHint)
+    suspend fun enhance(prompt: String, forVideo: Boolean = false) = dolphin.enhance(prompt, forVideo)
 }
