@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.aura.studio.data.AppDatabase
 import com.aura.studio.data.AvatarDao
+import com.aura.studio.data.Migrations
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,7 +24,8 @@ object DatabaseModule {
             AppDatabase::class.java,
             "aura.db"
         )
-            .fallbackToDestructiveMigration()
+            .addMigrations(*Migrations.ALL)
+            .fallbackToDestructiveMigrationOnDowngrade()
             .build()
 
     @Provides
