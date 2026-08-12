@@ -3,6 +3,7 @@ package com.aura.studio.generation
 import com.aura.studio.avatar.AvatarOptions
 import com.aura.studio.avatar.AvatarSpec
 import com.aura.studio.model.LocalModel
+import com.aura.studio.nativebridge.LlamaBridge
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -20,17 +21,19 @@ interface LocalLlmEngine {
 class DolphinLlmEngine : LocalLlmEngine {
     private var currentModel: LocalModel? = null
     private var loaded = false
-    private val nativeWired = false
+    private val nativeWired: Boolean get() = LlamaBridge.isAvailable()
 
     override suspend fun isReady(): Boolean = loaded && currentModel != null
 
     override suspend fun load(model: LocalModel): Boolean = withContext(Dispatchers.IO) {
+        LlamaBridge.loadSafe(model.path, nCtx = 4096, nGpuLayers = 0)
         currentModel = model
         loaded = true
         true
     }
 
     override suspend fun unload() = withContext(Dispatchers.IO) {
+        LlamaBridge.freeSafe()
         currentModel = null
         loaded = false
     }
@@ -52,7 +55,7 @@ class DolphinLlmEngine : LocalLlmEngine {
     }
 
     private fun nativeGenerate(systemPrompt: String, userPrompt: String, maxTokens: Int, temperature: Float): String {
-        error("Set nativeWired=true and implement LlamaBridge")
+        return LlamaBridge.chatSafe(systemPrompt, userPrompt, maxTokens, temperature) ?: "[llama native call failed]"
     }
 
     private fun expandPromptLocally(base: String): String {
@@ -82,26 +85,18 @@ class DolphinLlmEngine : LocalLlmEngine {
         val pose = if (nudeBias) listOf("Standing", "Arching", "Lying", "Kneeling", "Spread", "From behind").random() else AvatarOptions.poses.random()
         val names = listOf("Aria", "Luna", "Vera", "Nova", "Sable", "Iris", "Raven", "Nyx", "Jade", "Ruby", "Vesper", "Celeste", "Mira", "Kira", "Zara")
         return AvatarSpec(
-            name = names.random(),
-            age = (19..28).random(),
-            ethnicity = ethnicity,
-            bodyType = bodyType,
-            breastSize = breastSize,
-            skinTone = skinTone,
-            eyeColor = AvatarOptions.eyeColors.random(),
-            eyeShape = AvatarOptions.eyeShapes.random(),
-            nose = AvatarOptions.noses.random(),
-            mouth = AvatarOptions.mouths.random(),
+            name = names.random(), age = (19..28).random(), ethnicity = ethnicity, bodyType = bodyType,
+            breastSize = breastSize, skinTone = skinTone,
+            eyeColor = AvatarOptions.eyeColors.random(), eyeShape = AvatarOptions.eyeShapes.random(),
+            nose = AvatarOptions.noses.random(), mouth = AvatarOptions.mouths.random(),
             faceShape = AvatarOptions.faceShapes.random(),
-            hairColor = AvatarOptions.hairColors.random(),
-            hairStyle = AvatarOptions.hairStyles.random(),
+            hairColor = AvatarOptions.hairColors.random(), hairStyle = AvatarOptions.hairStyles.random(),
             hairLength = listOf(0.4f, 0.6f, 0.8f, 1.0f).random(),
             isNude = nudeBias,
             clothing = if (nudeBias) "None" else listOf("Lingerie", "Fishnet", "Latex", "Bikini", "Harness").random(),
             outfitStyle = if (nudeBias) "None" else listOf("Fetish", "Minimal", "Cyber", "Cosplay").random(),
             accentColor = listOf("Black", "Red", "Cyan", "Magenta", "White").random(),
-            glow = r.nextFloat().coerceIn(0.2f, 0.7f),
-            depth = r.nextFloat().coerceIn(0.3f, 0.8f),
+            glow = r.nextFloat().coerceIn(0.2f, 0.7f), depth = r.nextFloat().coerceIn(0.3f, 0.8f),
             shadow = r.nextFloat().coerceIn(0.2f, 0.6f),
             filter = listOf("None", "None", "Neon", "Cyber", "Matte").random(),
             pose = pose,
@@ -113,8 +108,7 @@ class DolphinLlmEngine : LocalLlmEngine {
     private fun parseOpinionJson(raw: String): AvatarSpec? = try {
         val start = raw.indexOf('{')
         val end = raw.lastIndexOf('}')
-        if (start < 0 || end <= start) null
-        else {
+        if (start < 0 || end <= start) null else {
             val json = JSONObject(raw.substring(start, end + 1))
             AvatarSpec(
                 name = json.optString("name", "Aria"),
