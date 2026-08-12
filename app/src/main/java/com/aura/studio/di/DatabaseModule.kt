@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.aura.studio.data.AppDatabase
 import com.aura.studio.data.AvatarDao
+import com.aura.studio.data.GenerationDao
 import com.aura.studio.data.Migrations
 import dagger.Module
 import dagger.Provides
@@ -15,19 +16,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "aura.db"
-        )
+        Room.databaseBuilder(context, AppDatabase::class.java, "aura.db")
             .addMigrations(*Migrations.ALL)
             .fallbackToDestructiveMigrationOnDowngrade()
             .build()
 
     @Provides
     fun provideAvatarDao(db: AppDatabase): AvatarDao = db.avatarDao()
+
+    @Provides
+    fun provideGenerationDao(db: AppDatabase): GenerationDao = db.generationDao()
 }
