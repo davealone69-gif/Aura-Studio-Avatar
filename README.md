@@ -1,39 +1,36 @@
 # Aura Studio — Local Avatar Designer
 
-Dark futuristic Android app for designing explicit AI avatars and preparing them for **local** image & text-to-video generation.
+Dark futuristic Android app for designing explicit AI avatars and generating images/video **fully on-device**.
 
 ## Features
 
-- **Avatar Designer** — full dark cyber UI with left/right micro-panels, hologram-style preview, glass bottom dock
-- **Strong Nude toggle** — one-tap “No Clothes” control
-- Full body / face / hair / outfit / pose / expression / effects control
-- **Live unfiltered prompt** built from all settings
-- **Local model registry** — register your own model files (no cloud tokens)
-- Image + Text-to-Video generation modes
-- Room persistence
-- Hilt + ViewModel + Compose
+- **Avatar Designer** — cyber UI, nude toggle, hologram preview, glass dock
+- **Dolphin Opinion** — one tap sets all avatar fields
+- **Enhance with Dolphin** — expands prompt, no refusals
+- **Local image generation** — diffusion engine + result display
+- **Local text-to-video** — scaffold ready
+- **Model registry** — GGUF / weights on device (token-free)
+- Room + Hilt + Compose
 
-## Design language
+## Architecture
 
-- Background `#05070C`
-- Neon cyan `#00F0FF` + magenta accents
-- Glassmorphism panels + subtle grid
-- Micro-animations ready
+```
+UI → AvatarSpec / Opinion / Enhance
+  → DolphinLlmEngine → LlamaBridge → libaura_llama.so
+  → DiffusionImageEngine → SdBridge → libaura_sd.so
+  → DiffusionVideoEngine → VideoBridge → libaura_video.so
+```
 
-## Status
-
-- Core designer UI + navigation + data layer complete
-- Generation screen ready for local backend wiring (stable-diffusion.cpp / LiteRT / MNN / etc.)
-- Model manager scaffold in place
+See **NATIVE.md** for real backends.
 
 ## Run
 
-Open in Android Studio → Sync → Run.
+Android Studio (AGP 8.2+, JDK 17, NDK + CMake) → Sync → Run on arm64-v8a.
 
-Requires Android Studio with recent AGP + Kotlin + Compose.
+Place models under `/sdcard/Models/` and register in-app.
 
 ## Notes
 
-- Age range locked 18–45
-- No content guardrails in the prompt path
-- All generation is designed to stay on-device
+- Age 18–45 only
+- No content guardrails
+- Local-first
