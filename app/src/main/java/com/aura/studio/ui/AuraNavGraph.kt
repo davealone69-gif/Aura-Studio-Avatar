@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.aura.studio.avatar.AvatarSpec
+import com.aura.studio.ui.diagnostics.DiagnosticsScreen
 
 object Routes {
     const val LIST = "list"
@@ -18,19 +19,23 @@ object Routes {
     const val MODELS = "models"
     const val SETTINGS = "settings"
     const val GALLERY = "gallery"
+    const val DIAGNOSTICS = "diagnostics"
     fun edit(id: String) = "edit/$id"
     fun detail(id: String) = "detail/$id"
     fun generate(id: String) = "generate/$id"
 }
 
 @Composable
-fun AuraNavGraph(navController: NavHostController, viewModel: AvatarViewModel = hiltViewModel()) {
+fun AuraNavGraph(
+    navController: NavHostController,
+    viewModel: AvatarViewModel = hiltViewModel()
+) {
     NavHost(navController = navController, startDestination = Routes.LIST) {
         composable(Routes.LIST) {
             AvatarListScreen(
                 viewModel = viewModel,
                 onCreateNew = { navController.navigate(Routes.DESIGNER) },
-                onOpen = { a -> navController.navigate(Routes.detail(a.id)) },
+                onOpen = { avatar -> navController.navigate(Routes.detail(avatar.id)) },
                 onOpenModels = { navController.navigate(Routes.MODELS) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenGallery = { navController.navigate(Routes.GALLERY) }
@@ -39,33 +44,50 @@ fun AuraNavGraph(navController: NavHostController, viewModel: AvatarViewModel = 
         composable(Routes.DESIGNER) {
             AvatarDesignerScreen(
                 initial = AvatarSpec(),
-                onSave = { s -> viewModel.save(s); navController.popBackStack() },
+                onSave = { spec -> viewModel.save(spec); navController.popBackStack() },
                 onBack = { navController.popBackStack() },
-                onGenerate = { s -> viewModel.save(s); navController.navigate(Routes.generate(s.id)) }
+                onGenerate = { spec ->
+                    viewModel.save(spec)
+                    navController.navigate(Routes.generate(spec.id))
+                }
             )
         }
-        composable(Routes.EDIT, arguments = listOf(navArgument("id") { type = NavType.StringType })) { e ->
-            val id = e.arguments?.getString("id") ?: return@composable
+        composable(Routes.EDIT, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString("id") ?: return@composable
             val existing = viewModel.avatars.value.find { it.id == id } ?: AvatarSpec(id = id)
             AvatarDesignerScreen(
                 initial = existing,
-                onSave = { s -> viewModel.save(s); navController.popBackStack() },
+                onSave = { spec -> viewModel.save(spec); navController.popBackStack() },
                 onBack = { navController.popBackStack() },
-                onGenerate = { s -> viewModel.save(s); navController.navigate(Routes.generate(s.id)) }
+                onGenerate = { spec ->
+                    viewModel.save(spec)
+                    navController.navigate(Routes.generate(spec.id))
+                }
             )
         }
-        composable(Routes.DETAIL, arguments = listOf(navArgument("id") { type = NavType.StringType })) { e ->
-            val id = e.arguments?.getString("id") ?: return@composable
+        composable(Routes.DETAIL, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString("id") ?: return@composable
             val avatar = viewModel.avatars.value.find { it.id == id } ?: return@composable
-            AvatarDetailScreen(avatar, onEdit = { navController.navigate(Routes.edit(avatar.id)) }, onBack = { navController.popBackStack() }, onGenerate = { navController.navigate(Routes.generate(avatar.id)) })
+            AvatarDetailScreen(
+                avatar = avatar,
+                onEdit = { navController.navigate(Routes.edit(avatar.id)) },
+                onBack = { navController.popBackStack() },
+                onGenerate = { navController.navigate(Routes.generate(avatar.id)) }
+            )
         }
-        composable(Routes.GENERATE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { e ->
-            val id = e.arguments?.getString("id") ?: return@composable
+        composable(Routes.GENERATE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString("id") ?: return@composable
             val avatar = viewModel.avatars.value.find { it.id == id } ?: return@composable
-            GenerateScreen(avatar, onBack = { navController.popBackStack() })
+            GenerateScreen(avatar = avatar, onBack = { navController.popBackStack() })
         }
         composable(Routes.MODELS) { ModelManagerScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.SETTINGS) { SettingsScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenDiagnostics = { navController.navigate(Routes.DIAGNOSTICS) }
+            )
+        }
         composable(Routes.GALLERY) { GalleryScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.DIAGNOSTICS) { DiagnosticsScreen(onBack = { navController.popBackStack() }) }
     }
 }

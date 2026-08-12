@@ -1,19 +1,30 @@
 # Aura Studio
 
-**Local-first explicit avatar lab for Android.**
+**Local-first explicit avatar lab for Android.** Zero cloud tokens.
 
-Design characters, expand prompts with uncensored local LLMs (Dolphin), generate on-device, keep history — **zero cloud tokens**.
+## Features
 
-## Highlights
-
-- Cyber Avatar Designer (nude toggle, full controls)
-- Dolphin Opinion + Enhance
-- Image + video generation pipelines
-- Generation history + favorites
-- Settings (steps, CFG, size, defaults)
-- Model file picker
-- Room v3 migrations
+- Cyber Avatar Designer (nude, face/body/pose/effects)
+- Dolphin Opinion + Enhance (uncensored local LLM)
+- Data-driven Rooms (Bedroom, Dungeon, Studio, Club)
+- Generate image/video + room picker
+- Gallery history + favorites
+- Models file picker
+- Settings (steps, CFG, size)
+- System Monitor + self-repair
+- Room DB v3 with migrations
 - Save to Pictures/AuraStudio
+
+## Architecture
+
+```
+UI → AIService / DolphinService
+   → AvatarEngine · RoomEngine · MemoryEngine · RelationshipEngine
+   → Dolphin / Diffusion / Video
+   → SystemMonitor (HealthMonitor + SelfRepairService)
+```
+
+See ARCHITECTURE.md and NATIVE.md.
 
 ## Run
 
@@ -21,4 +32,6 @@ Design characters, expand prompts with uncensored local LLMs (Dolphin), generate
 ./gradlew :app:assembleDebug
 ```
 
-See NATIVE.md for llama.cpp / SD linking.
+## Routes
+
+list · designer · generate/{id} · models · gallery · settings · diagnostics
