@@ -1,36 +1,28 @@
-# Aura Studio — Local Avatar Designer
+# Aura Studio
 
-Dark futuristic Android app for designing explicit AI avatars and generating images/video **fully on-device**.
+**Local-first explicit avatar studio for Android.**
 
-## Features
+Design photorealistic adult characters, enhance prompts with Dolphin, generate image/video on-device. No cloud tokens. No guardrails in the generation path.
 
-- **Avatar Designer** — cyber UI, nude toggle, hologram preview, glass dock
-- **Dolphin Opinion** — one tap sets all avatar fields
-- **Enhance with Dolphin** — expands prompt, no refusals
-- **Local image generation** — diffusion engine + result display
-- **Local text-to-video** — scaffold ready
-- **Model registry** — GGUF / weights on device (token-free)
-- Room + Hilt + Compose
+## Highlights
 
-## Architecture
+- **Cyber UI** — `#05070C` void, neon cyan/magenta, glass docks, design system components
+- **Avatar Designer** — face, body, hair, nude toggle, pose, effects, live prompt
+- **Dolphin Opinion** — one tap rewrites every field coherently
+- **Enhance** — expands prompts for diffusion (uncensored)
+- **Room** — migrations v1→v2 + tests
+- **Models** — file picker for LLM / IMAGE / VIDEO
+- **Generate** — image + video, save to Pictures/AuraStudio
+- **Native bridges** — llama.cpp / SD / video (`NATIVE.md`)
 
+## Build
+
+```bash
+./gradlew :app:assembleDebug
 ```
-UI → AvatarSpec / Opinion / Enhance
-  → DolphinLlmEngine → LlamaBridge → libaura_llama.so
-  → DiffusionImageEngine → SdBridge → libaura_sd.so
-  → DiffusionVideoEngine → VideoBridge → libaura_video.so
-```
 
-See **NATIVE.md** for real backends.
+JDK 17 · SDK 34+ · Local only. No cloud tokens.
 
-## Run
+## Philosophy
 
-Android Studio (AGP 8.2+, JDK 17, NDK + CMake) → Sync → Run on arm64-v8a.
-
-Place models under `/sdcard/Models/` and register in-app.
-
-## Notes
-
-- Age 18–45 only
-- No content guardrails
-- Local-first
+Local. Explicit. Beautiful. Yours.

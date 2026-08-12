@@ -20,12 +20,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AuraTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = CyberBg
-                ) {
-                    val navController = rememberNavController()
-                    AuraNavGraph(navController = navController)
+                Surface(modifier = Modifier.fillMaxSize(), color = CyberBg) {
+                    AuraNavGraph(navController = rememberNavController())
                 }
             }
         }
