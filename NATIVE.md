@@ -1,42 +1,28 @@
-# Native backends (llama.cpp / SD / Video)
+# Native backends
 
-## Libraries
+## Model paths
 
-| Lib | Kotlin | C++ stub | Purpose |
-|-----|--------|----------|--------|
-| `libaura_llama.so` | `LlamaBridge` | `llama_jni_stub.cpp` | Dolphin / GGUF chat |
-| `libaura_sd.so` | `SdBridge` | `sd_jni_stub.cpp` | Text-to-image |
-| `libaura_video.so` | `VideoBridge` | `video_jni_stub.cpp` | Text-to-video |
+| Role | Example |
+|------|--------|
+| LLM | `/sdcard/Models/dolphin-3.0-llama3.1-8b.Q4_K_M.gguf` or SAF URI from Models picker |
+| Image / Video | Models picker → DataStore |
 
-Stubs always build. Real inference requires replacing stubs with real backends.
+## Build with NDK
 
-## Enable NDK in app/build.gradle.kts
-
-```kotlin
-android {
-    defaultConfig {
-        ndk { abiFilters += listOf("arm64-v8a") }
-        externalNativeBuild {
-            cmake {
-                cppFlags += "-O3"
-                arguments += listOf("-DANDROID_STL=c++_shared")
-            }
-        }
-    }
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
-}
+```bash
+./gradlew :app:assembleDebug -Paura.enableNdk=true
 ```
 
-## Models on device
+arm64-v8a only. Without the flag, pure Kotlin builds (simulator).
 
-```
-/sdcard/Models/dolphin-3.0-*.Q4_K_M.gguf
-/sdcard/Models/*.safetensors
-```
+## Real llama.cpp
 
-Register paths in the app Models screen. No content filters in the intended path.
+1. Vendor under `app/src/main/cpp/llama.cpp`
+2. CMake: link `llama` to `aura_llama`
+3. Fill TODOs in `llama_wrapper.cpp`
+
+JNI package: `com.aura.studio.nativebridge.LlamaBridge`
+
+## OOM
+
+`n_ctx` default 2048. Unload LLM before SD. Use Diagnostics + `memoryUsed()`.

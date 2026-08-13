@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.22.1)
 project(aura_native)
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(aura_llama SHARED llama_jni_stub.cpp)
+add_library(aura_llama SHARED llama_bridge.cpp llama_wrapper.cpp)
+target_include_directories(aura_llama PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_compile_options(aura_llama PRIVATE -O3 -fPIC)
 target_link_libraries(aura_llama android log)
 
 add_library(aura_sd SHARED sd_jni_stub.cpp)
