@@ -16,7 +16,9 @@ void free_model();
 std::string chat_once(const std::string &prompt);
 bool is_loaded();
 ModelStats get_stats();
-void set_n_ctx(int n_ctx);
+
+bool load_model(const std::string &path, int n_ctx, int n_gpu_layers, std::string &err);
+std::string chat(const std::string &system_prompt, const std::string &user_prompt, int max_tokens, float temperature);
 
 } // namespace aura
 
