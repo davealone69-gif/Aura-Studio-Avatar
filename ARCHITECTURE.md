@@ -1,33 +1,12 @@
 # Aura Studio — Ultimate Architecture
 
 ```
-Compose UI → AIService → AvatarEngine | RoomEngine | MemoryEngine | RelationshipEngine | Local backends
+Compose UI → GameCore / AIService / DolphinService
+  AvatarStateEngine · RoomEngine · MemoryBrainEngine
+  StoryEngine · AnimationEngine · EmotionSystem · VoiceService
+  → Local backends (Dolphin / SD / Video) + Room DB + SystemMonitor
 ```
 
-## Data-driven rooms
+Data-driven: RoomDefinition, InteractiveObject, AvatarState, AvatarMemory, StoryState, AvatarAnimation.
 
-```kotlin
-RoomDefinition(
-  type = RoomType.BEDROOM,
-  environment = ...,
-  lighting = ...,
-  furniture = ...,
-  ambience = ...,
-  interactions = ...,
-  actionPrompt = "..."
-)
-```
-
-Add a room = one catalog entry. No new screen class.
-
-## Engines
-
-| Engine | Role |
-|--------|------|
-| AvatarEngine | Avatars, prompts, Dolphin |
-| RoomEngine | Catalog + scene prompts |
-| MemoryEngine | History / favorites |
-| RelationshipEngine | Affinity modifiers |
-| AIService | Facade for UI |
-
-Local-first. Optional future HTTP backend behind same facade.
+AiChatService is provider-agnostic (LocalAiChatService = Dolphin).
