@@ -1,12 +1,13 @@
 # Aura Studio — Ultimate Architecture
 
 ```
-Compose UI → GameCore / AIService / DolphinService
-  AvatarStateEngine · RoomEngine · MemoryBrainEngine
-  StoryEngine · AnimationEngine · EmotionSystem · VoiceService
-  → Local backends (Dolphin / SD / Video) + Room DB + SystemMonitor
+Compose UI → ViewModels → GAME CORE
+  AvatarEngine · AvatarStateEngine · RoomEngine · StoryEngine
+  MemoryEngine · ConversationMemory · RelationshipEngine
+  AnimationEngine · VoiceService · SystemMonitor
+       → AIService / DolphinService → local native backends
 ```
 
-Data-driven: RoomDefinition, InteractiveObject, AvatarState, AvatarMemory, StoryState, AvatarAnimation.
-
-AiChatService is provider-agnostic (LocalAiChatService = Dolphin).
+Data-driven: RoomDefinition, InteractiveObject, AvatarState, StoryBeat, AvatarMemory.
+Emotion pipeline: state → expression → animation → voice → ambience.
+Admin: Settings → Developer / Admin.

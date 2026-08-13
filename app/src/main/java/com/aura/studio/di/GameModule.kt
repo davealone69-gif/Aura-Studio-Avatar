@@ -1,18 +1,18 @@
 package com.aura.studio.di
 
-import com.aura.studio.ai.AiChatService
-import com.aura.studio.ai.LocalAiChatService
-import com.aura.studio.domain.voice.LocalStubVoiceService
-import com.aura.studio.domain.voice.VoiceService
-import dagger.Binds
+import com.aura.studio.animation.AnimationEngine
+import com.aura.studio.animation.LogAnimationEngine
+import com.aura.studio.voice.LocalVoiceService
+import com.aura.studio.voice.VoiceService
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class GameModule {
-    @Binds @Singleton abstract fun bindAiChat(impl: LocalAiChatService): AiChatService
-    @Binds @Singleton abstract fun bindVoice(impl: LocalStubVoiceService): VoiceService
+object GameModule {
+    @Provides @Singleton fun voiceService(): VoiceService = LocalVoiceService()
+    @Provides @Singleton fun animationEngine(): AnimationEngine = LogAnimationEngine()
 }
