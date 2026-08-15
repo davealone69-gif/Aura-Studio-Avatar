@@ -1,23 +1,45 @@
 package com.aura.studio.engine
 
 import com.aura.studio.domain.avatar.AvatarState
+import com.aura.studio.domain.avatar.Emotion
 import com.aura.studio.domain.avatar.resolveEmotion
 import com.aura.studio.domain.avatar.toPromptModifier
-import com.aura.studio.domain.emotion.EmotionPipeline
 import com.aura.studio.domain.emotion.EmotionPresentation
+import com.aura.studio.domain.emotion.EmotionTag
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AvatarStateEngine @Inject constructor() {
     private val states = mutableMapOf<String, AvatarState>()
+
     fun get(avatarId: String) = states.getOrPut(avatarId) { AvatarState(avatarId = avatarId) }
+
     fun update(avatarId: String, transform: (AvatarState) -> AvatarState): AvatarState {
         val next = transform(get(avatarId)).copy(updatedAt = System.currentTimeMillis())
-        states[avatarId] = next.copy(emotion = next.resolveEmotion())
-        return states[avatarId]!!
+        val resolved = next.copy(emotion = next.resolveEmotion(), lastEmotion = next.resolveEmotion())
+        states[avatarId] = resolved
+        return resolved
     }
+
+    fun moveToRoom(avatarId: String, roomId: String): AvatarState =
+        update(avatarId) { it.copy(currentRoomId = roomId) }
+
     fun setRoom(avatarId: String, roomId: String?) = update(avatarId) { it.copy(currentRoomId = roomId) }
+
+    fun onInteraction(avatarId: String, text: String): Pair<AvatarState, EmotionPresentation> {
+        val next = applySocialTick(avatarId)
+        val emotion = next.resolveEmotion()
+        val presentation = EmotionPresentation(
+            emotion = EmotionTag.entries.firstOrNull { it.name == emotion.name } ?: EmotionTag.CALM,
+            expression = emotion.name.lowercase(),
+            animationId = "anim_${emotion.name.lowercase()}",
+            voiceTone = "neutral",
+            ambienceHint = "default"
+        )
+        return next to presentation
+    }
+
     fun applySocialTick(avatarId: String, deltaAffection: Float = 0.03f, deltaTrust: Float = 0.02f) =
         update(avatarId) {
             it.copy(
@@ -32,10 +54,29 @@ class AvatarStateEngine @Inject constructor() {
                 energy = (it.energy - 0.02f).coerceIn(0.1f, 1f)
             )
         }
+
     fun setMood(avatarId: String, mood: Float) = update(avatarId) { it.copy(mood = mood.coerceIn(0f, 1f)) }
-    fun noteEvent(avatarId: String, summary: String) = update(avatarId) { it.copy(lastEventSummary = summary.take(200)) }
-    fun presentation(avatarId: String): EmotionPresentation = EmotionPipeline.present(get(avatarId))
+
+    fun noteEvent(avatarId: String, summary: String) =
+        update(avatarId) { it.copy(lastEventSummary = summary.take(200)) }
+
+    fun presentation(avatarId: String): EmotionPresentation {
+        val st = get(avatarId)
+        val emotion = st.resolveEmotion()
+        return EmotionPresentation(
+            emotion = EmotionTag.entries.firstOrNull { it.name == emotion.name } ?: EmotionTag.CALM,
+            expression = emotion.name.lowercase(),
+            animationId = "anim_${emotion.name.lowercase()}",
+            voiceTone = "neutral",
+            ambienceHint = "default"
+        )
+    }
+
     fun promptModifier(avatarId: String) = get(avatarId).toPromptModifier()
-    fun reset(avatarId: String) { states[avatarId] = AvatarState(avatarId = avatarId) }
+
+    fun reset(avatarId: String) {
+        states[avatarId] = AvatarState(avatarId = avatarId)
+    }
+
     fun all() = states.toMap()
 }

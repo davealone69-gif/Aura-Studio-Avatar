@@ -11,6 +11,8 @@ data class AvatarState(
     val currentRoomId: String? = null,
     val personality: PersonalityProfile = PersonalityProfile(),
     val emotion: Emotion = Emotion.CALM,
+    /** Alias kept for GameCore / animation paths */
+    val lastEmotion: Emotion = Emotion.CALM,
     val goals: List<String> = emptyList(),
     val likes: List<String> = emptyList(),
     val dislikes: List<String> = emptyList(),
@@ -34,6 +36,11 @@ enum class Emotion {
     PLAYFUL, SAD, ANGRY, SURPRISED, TIRED, AROUSED, NEUTRAL
 }
 
+enum class EmotionTag {
+    HAPPY, CALM, CURIOUS, EXCITED, SHY, CONFIDENT,
+    PLAYFUL, SAD, ANGRY, SURPRISED, TIRED, AROUSED, NEUTRAL
+}
+
 fun AvatarState.resolveEmotion(): Emotion = when {
     energy < 0.25f -> Emotion.TIRED
     mood > 0.75f && affection > 0.5f -> Emotion.HAPPY
@@ -45,6 +52,11 @@ fun AvatarState.resolveEmotion(): Emotion = when {
     else -> emotion
 }
 
+fun AvatarState.withEmotion(tag: EmotionTag): AvatarState {
+    val e = Emotion.entries.firstOrNull { it.name == tag.name } ?: Emotion.CALM
+    return copy(emotion = e, lastEmotion = e)
+}
+
 fun AvatarState.toPromptModifier(): String = buildString {
     append("emotion: ${resolveEmotion().name.lowercase()}")
     append(", mood ${"%.0f".format(mood * 100)}%")
@@ -54,3 +66,5 @@ fun AvatarState.toPromptModifier(): String = buildString {
     if (conversationStyle.isNotBlank()) append(", tone: $conversationStyle")
     if (lastEventSummary.isNotBlank()) append(", recent: $lastEventSummary")
 }
+
+fun AvatarState.promptModifier(): String = toPromptModifier()
