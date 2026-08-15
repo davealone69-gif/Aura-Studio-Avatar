@@ -31,23 +31,37 @@ jobs:
 
       - name: Assemble debug (no NDK)
         id: assemble
-        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee assemble.log
         continue-on-error: true
 
-      - name: Dump error log on failure
+      - name: Collect error evidence
         if: steps.assemble.outcome == 'failure'
         run: |
-          echo "===== GRADLE ERROR DUMP ====="
-          echo "----- kotlin compile logs -----"
-          find app/build -path '*compileDebugKotlin*' -name '*.log' 2>/dev/null | while read f; do echo "### $f"; tail -100 "$f"; done || true
-          echo "----- ksp logs -----"
-          find app/build -path '*ksp*' -type f -name '*.log' 2>/dev/null | head -5 | while read f; do echo "### $f"; tail -50 "$f"; done || true
-          echo "----- grep for e: errors in build -----"
-          find app/build -name '*.txt' -o -name '*.log' 2>/dev/null | head -30 | xargs grep -h "^e: " 2>/dev/null | head -40 || true
-          echo "----- listing app/build -----"
-          ls -la app/build/ 2>/dev/null || true
-          ls -la app/build/tmp/kotlin-classes/ 2>/dev/null || true
-          exit 1
+          mkdir -p error-dump
+          cp assemble.log error-dump/ || true
+          # Kotlin compiler errors
+          find app/build -name '*.log' 2>/dev/null | head -50 | while read f; do
+            mkdir -p "error-dump/$(dirname "$f")"
+            cp "$f" "error-dump/$f" 2>/dev/null || true
+          done
+          # Grep all e: lines
+          (find app/build -type f \( -name '*.log' -o -name '*.txt' \) -exec grep -H '^e: ' {} + 2>/dev/null || true) > error-dump/all-e-errors.txt
+          # KSP
+          find app/build -path '*ksp*' -type d 2>/dev/null | head -5 >> error-dump/ksp-dirs.txt || true
+          ls -laR app/build/tmp 2>/dev/null | head -100 > error-dump/tmp-listing.txt || true
+          echo "Assemble outcome: ${{ steps.assemble.outcome }}" > error-dump/status.txt
+
+      - name: Upload error dump
+        if: steps.assemble.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-error-dump
+          path: error-dump/
+          if-no-files-found: warn
+
+      - name: Fail job if assemble failed
+        if: steps.assemble.outcome == 'failure'
+        run: exit 1
 
       - name: Unit tests
         if: steps.assemble.outcome == 'success'
