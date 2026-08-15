@@ -26,24 +26,22 @@ jobs:
         run: |
           mkdir -p gradle/wrapper
           curl -fsSL -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.7.0/gradle/wrapper/gradle-wrapper.jar
-          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
-networkTimeout=10000
-validateDistributionUrl=true
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
-          # Minimal reliable gradlew launcher
-          cat > gradlew << 'SCRIPT'
-#!/usr/bin/env sh
-# Gradle start-up script for POSIX
-DIRNAME=$(dirname "$0")
-APP_HOME=$(cd "$DIRNAME" && pwd)
-CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
-exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
-SCRIPT
+          printf '%s\n' \
+            'distributionBase=GRADLE_USER_HOME' \
+            'distributionPath=wrapper/dists' \
+            'distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip' \
+            'networkTimeout=10000' \
+            'validateDistributionUrl=true' \
+            'zipStoreBase=GRADLE_USER_HOME' \
+            'zipStorePath=wrapper/dists' \
+            > gradle/wrapper/gradle-wrapper.properties
+          printf '%s\n' \
+            '#!/usr/bin/env sh' \
+            'DIRNAME=$(dirname "$0")' \
+            'APP_HOME=$(cd "$DIRNAME" && pwd)' \
+            'CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar' \
+            'exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"' \
+            > gradlew
           chmod +x gradlew
 
       - name: Assemble debug (no NDK)
@@ -84,22 +82,22 @@ SCRIPT
         run: |
           mkdir -p gradle/wrapper
           curl -fsSL -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.7.0/gradle/wrapper/gradle-wrapper.jar
-          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
-networkTimeout=10000
-validateDistributionUrl=true
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
-          cat > gradlew << 'SCRIPT'
-#!/usr/bin/env sh
-DIRNAME=$(dirname "$0")
-APP_HOME=$(cd "$DIRNAME" && pwd)
-CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
-exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
-SCRIPT
+          printf '%s\n' \
+            'distributionBase=GRADLE_USER_HOME' \
+            'distributionPath=wrapper/dists' \
+            'distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip' \
+            'networkTimeout=10000' \
+            'validateDistributionUrl=true' \
+            'zipStoreBase=GRADLE_USER_HOME' \
+            'zipStorePath=wrapper/dists' \
+            > gradle/wrapper/gradle-wrapper.properties
+          printf '%s\n' \
+            '#!/usr/bin/env sh' \
+            'DIRNAME=$(dirname "$0")' \
+            'APP_HOME=$(cd "$DIRNAME" && pwd)' \
+            'CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar' \
+            'exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"' \
+            > gradlew
           chmod +x gradlew
 
       - name: Assemble debug with NDK
