@@ -40,7 +40,7 @@ fun AuraNavHost(
             AvatarListScreen(
                 viewModel = viewModel,
                 onCreateNew = { navController.navigate(Screen.AvatarCreator.create()) },
-                onEdit = { avatar ->
+                onOpen = { avatar ->
                     navController.navigate(Screen.AvatarCreator.create(avatar.id))
                 }
             )
