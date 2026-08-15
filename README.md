@@ -35,3 +35,7 @@ See ARCHITECTURE.md and NATIVE.md.
 ## Routes
 
 list · designer · generate/{id} · models · gallery · settings · diagnostics
+
+## Build status
+
+CI runs `assembleDebug` on every push to `main`. Download the `app-debug-and-logs` artifact from the Actions tab.
