@@ -62,7 +62,7 @@ fun ModelManagerScreen(onBack: () -> Unit) {
         selectedId = model.id
     }
 
-    Box(Modifier = Modifier.fillMaxSize().background(CyberBg)) {
+    Box(modifier = Modifier.fillMaxSize().background(CyberBg)) {
         Column(Modifier.fillMaxSize()) {
             TopAppBar(
                 title = { Text("Local Models", color = CyberText, fontWeight = FontWeight.SemiBold) },
