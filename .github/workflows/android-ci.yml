@@ -32,30 +32,30 @@ jobs:
       - name: Clean and Assemble debug (no NDK)
         id: assemble
         run: |
-          ./gradlew :app:clean :app:assembleDebug --no-daemon --stacktrace --info 2>&1 | tee assemble.log
-          echo "GRADLE_EXIT=${PIPESTATUS[0]}" >> $GITHUB_ENV
-        continue-on-error: true
+          set -o pipefail
+          ./gradlew :app:clean :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee assemble.log
 
-      - name: List and collect outputs
+      - name: Verify APK exists and collect artifacts
         if: always()
         run: |
-          echo "=== last 100 lines of assemble.log ==="
-          tail -100 assemble.log || true
-          echo "=== find APKs ==="
-          find . -name "*.apk" -type f 2>/dev/null || echo "no apks found"
-          echo "=== outputs tree ==="
-          find app/build/outputs -type f 2>/dev/null | head -50 || echo "no outputs"
+          echo "=== last 120 lines of assemble.log ==="
+          tail -120 assemble.log || true
+          echo "=== searching for APKs ==="
+          find app/build -name "*.apk" -type f -print || true
           mkdir -p build-artifacts
-          cp assemble.log build-artifacts/ 2>/dev/null || true
-          # copy any apk anywhere under app/build
-          find app/build -name "*.apk" -type f -exec cp -v {} build-artifacts/ \; 2>/dev/null || true
-          # also try standard path
-          if [ -d app/build/outputs/apk ]; then
-            cp -rv app/build/outputs/apk build-artifacts/ 2>/dev/null || true
+          cp assemble.log build-artifacts/ || true
+          # Prefer standard location
+          if ls app/build/outputs/apk/debug/*.apk 1>/dev/null 2>&1; then
+            cp -v app/build/outputs/apk/debug/*.apk build-artifacts/
+            echo "APK_FOUND=true" >> $GITHUB_ENV
+          else
+            echo "APK_FOUND=false" >> $GITHUB_ENV
+            # still copy anything that looks like an apk
+            find app/build -name "*.apk" -type f -exec cp -v {} build-artifacts/ \; || true
           fi
-          ls -laR build-artifacts/ || true
+          ls -la build-artifacts/ || true
 
-      - name: Upload build artifacts
+      - name: Upload build artifacts (log + APK)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -63,9 +63,11 @@ jobs:
           path: build-artifacts/
           if-no-files-found: warn
 
-      - name: Fail if assemble failed
-        if: env.GRADLE_EXIT != '0'
-        run: exit 1
+      - name: Fail if no APK was produced
+        if: env.APK_FOUND != 'true'
+        run: |
+          echo "No debug APK found after assembleDebug. See assemble.log in the artifact."
+          exit 1
 
   assemble-ndk:
     runs-on: ubuntu-latest
