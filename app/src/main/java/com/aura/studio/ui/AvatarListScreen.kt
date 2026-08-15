@@ -26,7 +26,14 @@ import com.aura.studio.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AvatarListScreen(viewModel: AvatarViewModel, onCreateNew: () -> Unit, onOpen: (AvatarSpec) -> Unit, onOpenModels: () -> Unit = {}) {
+fun AvatarListScreen(
+    viewModel: AvatarViewModel,
+    onCreateNew: () -> Unit,
+    onOpen: (AvatarSpec) -> Unit,
+    onOpenModels: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+    onOpenGallery: () -> Unit = {}
+) {
     val avatars by viewModel.avatars.collectAsState()
     var query by remember { mutableStateOf("") }
     val filtered = remember(avatars, query) {
