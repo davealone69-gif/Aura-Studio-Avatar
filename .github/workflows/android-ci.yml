@@ -30,13 +30,32 @@ jobs:
           chmod +x gradlew
 
       - name: Assemble debug (no NDK)
+        id: assemble
         run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        continue-on-error: true
+
+      - name: Dump error log on failure
+        if: steps.assemble.outcome == 'failure'
+        run: |
+          echo "===== GRADLE ERROR DUMP ====="
+          echo "----- kotlin compile logs -----"
+          find app/build -path '*compileDebugKotlin*' -name '*.log' 2>/dev/null | while read f; do echo "### $f"; tail -100 "$f"; done || true
+          echo "----- ksp logs -----"
+          find app/build -path '*ksp*' -type f -name '*.log' 2>/dev/null | head -5 | while read f; do echo "### $f"; tail -50 "$f"; done || true
+          echo "----- grep for e: errors in build -----"
+          find app/build -name '*.txt' -o -name '*.log' 2>/dev/null | head -30 | xargs grep -h "^e: " 2>/dev/null | head -40 || true
+          echo "----- listing app/build -----"
+          ls -la app/build/ 2>/dev/null || true
+          ls -la app/build/tmp/kotlin-classes/ 2>/dev/null || true
+          exit 1
 
       - name: Unit tests
+        if: steps.assemble.outcome == 'success'
         run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
         continue-on-error: true
 
       - name: Upload APK
+        if: steps.assemble.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
