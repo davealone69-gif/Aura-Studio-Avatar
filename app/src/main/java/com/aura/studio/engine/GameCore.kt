@@ -2,6 +2,7 @@ package com.aura.studio.engine
 
 import com.aura.studio.ai.AiChatService
 import com.aura.studio.ai.AvatarResponse
+import com.aura.studio.animation.AnimationEngine
 import com.aura.studio.domain.avatar.AvatarState
 import com.aura.studio.domain.emotion.EmotionPresentation
 import com.aura.studio.domain.room.InteractiveObject

@@ -2,10 +2,10 @@ package com.aura.studio.engine
 
 import com.aura.studio.domain.avatar.AvatarState
 import com.aura.studio.domain.avatar.Emotion
+import com.aura.studio.domain.avatar.EmotionTag
 import com.aura.studio.domain.avatar.resolveEmotion
 import com.aura.studio.domain.avatar.toPromptModifier
 import com.aura.studio.domain.emotion.EmotionPresentation
-import com.aura.studio.domain.emotion.EmotionTag
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -77,6 +77,4 @@ class AvatarStateEngine @Inject constructor() {
     fun reset(avatarId: String) {
         states[avatarId] = AvatarState(avatarId = avatarId)
     }
-
-    fun all() = states.toMap()
 }
