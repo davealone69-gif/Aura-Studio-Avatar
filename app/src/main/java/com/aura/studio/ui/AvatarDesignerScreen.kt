@@ -1,11 +1,23 @@
 package com.aura.studio.ui
 
-// Full file with Dolphin enhance is in the working tree.
-// See commit message. Key additions:
-// - DolphinLlmEngine + PromptTemplates imports
-// - enhancedPrompt / isEnhancing state
-// - Enhance with Dolphin button under live prompt
-// - Enhance button in bottom dock
-// - Live prompt shows enhanced result in cyan when available
+import androidx.compose.runtime.Composable
+import com.aura.studio.avatar.AvatarSpec
 
-// Placeholder note for repo sync - full 26KB Designer screen written locally.
+/**
+ * Designer entry point used by AuraNavGraph.
+ * Delegates to AvatarCreatorScreen and surfaces an optional Generate action.
+ */
+@Composable
+fun AvatarDesignerScreen(
+    initial: AvatarSpec = AvatarSpec(),
+    onSave: (AvatarSpec) -> Unit = {},
+    onBack: () -> Unit = {},
+    onGenerate: (AvatarSpec) -> Unit = {}
+) {
+    AvatarCreatorScreen(
+        initial = initial,
+        onSave = onSave,
+        onBack = onBack
+        // Generate is available after save via list/detail; keep creator focused.
+    )
+}

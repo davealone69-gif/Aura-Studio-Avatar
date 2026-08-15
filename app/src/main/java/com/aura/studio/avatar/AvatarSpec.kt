@@ -26,7 +26,9 @@ data class AvatarSpec(
     val pose: String = "Standing",
     val expression: String = "Seductive",
     val extra: String = "",
-    val isNude: Boolean = true
+    val isNude: Boolean = true,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 ) {
     fun toPrompt(): String {
         return buildString {
