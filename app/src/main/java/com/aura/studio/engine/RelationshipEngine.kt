@@ -9,7 +9,7 @@ class RelationshipEngine @Inject constructor() {
 
     fun getAffinity(avatarId: String): Float = affinity[avatarId] ?: 0f
 
-    fun boostAffinity(avatarId: String, delta: Float) {
+    fun boostAffinity(avatarId: String, delta: Float = 0.03f) {
         val next = ((affinity[avatarId] ?: 0f) + delta).coerceIn(0f, 1f)
         affinity[avatarId] = next
     }
@@ -20,5 +20,15 @@ class RelationshipEngine @Inject constructor() {
 
     fun reset(avatarId: String) {
         affinity.remove(avatarId)
+    }
+
+    fun promptModifier(avatarId: String): String {
+        val a = getAffinity(avatarId)
+        return when {
+            a > 0.75f -> "close bond, high trust"
+            a > 0.4f -> "friendly rapport"
+            a > 0.15f -> "warming up"
+            else -> ""
+        }
     }
 }

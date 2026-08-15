@@ -33,4 +33,6 @@ class StoryEngine @Inject constructor() {
         }
         return current.copy(relationshipLevel = relationshipLevel)
     }
+
+    fun promptFragment(avatarId: String): String = get(avatarId).promptFrame()
 }

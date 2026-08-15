@@ -44,6 +44,9 @@ data class AvatarSpec(
             append(", highly detailed, photorealistic")
         }
     }
+
+    fun toVideoPrompt(): String =
+        toPrompt() + ", subtle natural motion, gentle camera drift, cinematic lighting"
 }
 
 object AvatarOptions {

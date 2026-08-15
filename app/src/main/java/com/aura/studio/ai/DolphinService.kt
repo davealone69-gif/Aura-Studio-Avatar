@@ -93,6 +93,11 @@ class DolphinService @Inject constructor(
 
     fun lastLoadResult(): ModelLoadResult? = lastLoad
 
+    fun memoryUsage(): Long = LlamaBridge.memoryUsed()
+    fun maxContext(): Int = LlamaBridge.maxContext()
+    fun isMemoryHigh(): Boolean = memoryUsage() > 1_500_000_000L
+    suspend fun unload() = engine.unload()
+
     private suspend fun resolvePath(): String {
         val fromPrefs = prefs.genDefaults.first().defaultLlmPath.trim()
         return fromPrefs.ifBlank { "/sdcard/Models/dolphin-3.0-llama3.1-8b.Q4_K_M.gguf" }
