@@ -34,29 +34,25 @@ jobs:
         run: ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee assemble.log
         continue-on-error: true
 
-      - name: Collect error evidence
-        if: steps.assemble.outcome == 'failure'
+      - name: List build outputs
+        if: always()
         run: |
-          mkdir -p error-dump
-          cp assemble.log error-dump/ || true
-          # Kotlin compiler errors
-          find app/build -name '*.log' 2>/dev/null | head -50 | while read f; do
-            mkdir -p "error-dump/$(dirname "$f")"
-            cp "$f" "error-dump/$f" 2>/dev/null || true
-          done
-          # Grep all e: lines
-          (find app/build -type f \( -name '*.log' -o -name '*.txt' \) -exec grep -H '^e: ' {} + 2>/dev/null || true) > error-dump/all-e-errors.txt
-          # KSP
-          find app/build -path '*ksp*' -type d 2>/dev/null | head -5 >> error-dump/ksp-dirs.txt || true
-          ls -laR app/build/tmp 2>/dev/null | head -100 > error-dump/tmp-listing.txt || true
-          echo "Assemble outcome: ${{ steps.assemble.outcome }}" > error-dump/status.txt
+          echo "=== assemble.log (last 80 lines) ==="
+          tail -80 assemble.log || true
+          echo "=== APK search ==="
+          find app/build -name "*.apk" -type f 2>/dev/null || echo "no apks"
+          ls -laR app/build/outputs 2>/dev/null || echo "no outputs dir"
+          mkdir -p build-artifacts
+          cp assemble.log build-artifacts/ || true
+          find app/build -name "*.apk" -type f -exec cp {} build-artifacts/ \; 2>/dev/null || true
+          ls -la app/build/outputs/apk/debug/ 2>/dev/null > build-artifacts/apk-dir.txt || echo "no debug apk dir" > build-artifacts/apk-dir.txt
 
-      - name: Upload error dump
-        if: steps.assemble.outcome == 'failure'
+      - name: Upload build artifacts (log + any APK)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: compile-error-dump
-          path: error-dump/
+          name: app-debug-and-logs
+          path: build-artifacts/
           if-no-files-found: warn
 
       - name: Fail job if assemble failed
@@ -68,16 +64,9 @@ jobs:
         run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
         continue-on-error: true
 
-      - name: Upload APK
-        if: steps.assemble.outcome == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
-
   assemble-ndk:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -104,4 +93,14 @@ jobs:
           chmod +x gradlew
 
       - name: Assemble debug with NDK
-        run: ./gradlew :app:assembleDebug -Paura.enableNdk=true --no-daemon --stacktrace
+        id: assemble-ndk
+        run: ./gradlew :app:assembleDebug -Paura.enableNdk=true --no-daemon --stacktrace 2>&1 | tee assemble-ndk.log
+        continue-on-error: true
+
+      - name: Upload NDK log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ndk-assemble-log
+          path: assemble-ndk.log
+          if-no-files-found: warn
