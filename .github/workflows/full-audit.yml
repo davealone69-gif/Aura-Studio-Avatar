@@ -1,0 +1,60 @@
+name: Full Repository Audit
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  audit:
+    name: Whole repository audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Qodana static analysis
+        uses: JetBrains/qodana-action@v2026.2
+
+      - name: Gradle audit and build
+        if: ${{ hashFiles('gradlew') != '' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew lint test assembleDebug --continue --stacktrace --console=plain
+
+      - name: Node audit and test
+        if: ${{ hashFiles('package.json') != '' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          npm ci --ignore-scripts
+          npm audit --audit-level=high || true
+          if npm run | grep -qE '^  (test|lint|build)'; then
+            npm run test --if-present
+            npm run lint --if-present
+            npm run build --if-present
+          fi
+
+      - name: Python syntax audit
+        if: ${{ hashFiles('**/*.py') != '' }}
+        shell: bash
+        run: |
+          python -m compileall -q .
+
+      - name: CodeQL security analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript,python,java-kotlin
+
+      - name: CodeQL analyze
+        uses: github/codeql-action/analyze@v3
