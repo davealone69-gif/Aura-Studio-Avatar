@@ -1,13 +1,16 @@
 package com.aura.studio.generation
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.BitmapFactory
+import android.util.Base64
 import com.aura.studio.model.LocalModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 interface LocalImageEngine {
     suspend fun isReady(): Boolean
@@ -16,9 +19,9 @@ interface LocalImageEngine {
     suspend fun generate(
         prompt: String,
         negativePrompt: String = DEFAULT_NEGATIVE,
-        width: Int = 512,
-        height: Int = 768,
-        steps: Int = 20,
+        width: Int = 256,
+        height: Int = 256,
+        steps: Int = 8,
         cfg: Float = 7f,
         seed: Long = -1L
     ): Bitmap?
@@ -28,20 +31,28 @@ interface LocalImageEngine {
             "lowres, bad anatomy, bad hands, text, error, missing fingers, " +
             "extra digit, fewer digits, cropped, worst quality, low quality, " +
             "jpeg artifacts, signature, watermark, username, blurry"
+        const val DEFAULT_SERVER_URL = "http://127.0.0.1:1234"
     }
 }
 
 class DiffusionImageEngine : LocalImageEngine {
     private var currentModel: LocalModel? = null
     private var loaded = false
-    private val nativeWired = false
+    private var serverUrl = LocalImageEngine.DEFAULT_SERVER_URL
 
     override suspend fun isReady(): Boolean = loaded && currentModel != null
 
     override suspend fun load(model: LocalModel): Boolean = withContext(Dispatchers.IO) {
         currentModel = model
-        loaded = true
-        true
+        serverUrl = LocalImageEngine.DEFAULT_SERVER_URL
+        loaded = runCatching {
+            val connection = URL("$serverUrl/").openConnection() as HttpURLConnection
+            connection.connectTimeout = 1500
+            connection.readTimeout = 1500
+            connection.requestMethod = "GET"
+            connection.responseCode in 200..499
+        }.getOrDefault(false)
+        loaded
     }
 
     override suspend fun unload() = withContext(Dispatchers.IO) {
@@ -58,38 +69,38 @@ class DiffusionImageEngine : LocalImageEngine {
         cfg: Float,
         seed: Long
     ): Bitmap? = withContext(Dispatchers.IO) {
-        if (!loaded) return@withContext null
-        if (nativeWired) return@withContext nativeGenerate(prompt, negativePrompt, width, height, steps, cfg, seed)
-        delay(800)
-        placeholderBitmap(width, height, prompt)
-    }
+        if (!loaded || prompt.isBlank()) return@withContext null
 
-    private fun nativeGenerate(
-        prompt: String, negativePrompt: String, width: Int, height: Int,
-        steps: Int, cfg: Float, seed: Long
-    ): Bitmap? {
-        error("Set nativeWired=true and implement SdCppBridge")
-    }
+        val payload = JSONObject().apply {
+            put("prompt", prompt)
+            put("negative_prompt", negativePrompt)
+            put("width", width.coerceIn(64, 512))
+            put("height", height.coerceIn(64, 512))
+            put("steps", steps.coerceIn(1, 12))
+            put("cfg_scale", cfg)
+            if (seed >= 0) put("seed", seed)
+        }.toString()
 
-    private fun placeholderBitmap(w: Int, h: Int, prompt: String): Bitmap {
-        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmp)
-        canvas.drawColor(Color.parseColor("#0B0F18"))
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#00F0FF")
-            textSize = 28f
-            textAlign = Paint.Align.CENTER
+        val connection = (URL("$serverUrl/sdapi/v1/txt2img").openConnection() as HttpURLConnection).apply {
+            connectTimeout = 5000
+            readTimeout = 120000
+            requestMethod = "POST"
+            doOutput = true
+            setRequestProperty("Content-Type", "application/json")
         }
-        canvas.drawText("LOCAL DIFFUSION", w / 2f, h / 2f - 40f, paint)
-        paint.textSize = 18f
-        paint.color = Color.parseColor("#8A9BB8")
-        val preview = if (prompt.length > 60) prompt.take(57) + "…" else prompt
-        canvas.drawText(preview, w / 2f, h / 2f + 10f, paint)
-        canvas.drawText("Wire stable-diffusion.cpp / MNN for real output", w / 2f, h / 2f + 50f, paint)
-        return bmp
-    }
 
-    companion object {
-        const val DEFAULT_NEGATIVE = LocalImageEngine.DEFAULT_NEGATIVE
+        try {
+            connection.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) }
+            if (connection.responseCode !in 200..299) return@withContext null
+
+            val body = BufferedReader(InputStreamReader(connection.inputStream, Charsets.UTF_8)).use { it.readText() }
+            val image = JSONObject(body).optJSONArray("images")?.optString(0).orEmpty()
+            if (image.isBlank()) return@withContext null
+
+            val clean = image.substringAfter("base64,", image)
+            Base64.decode(clean, Base64.DEFAULT).let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+        } finally {
+            connection.disconnect()
+        }
     }
 }
