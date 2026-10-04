@@ -50,7 +50,7 @@ jobs:
       - name: CodeQL security analysis
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript-typescript,python,java-kotlin
+          languages: python,java-kotlin
 
       - name: CodeQL analyze
         uses: github/codeql-action/analyze@v3
