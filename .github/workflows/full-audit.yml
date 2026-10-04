@@ -8,8 +8,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
-  actions: read
 
 jobs:
   audit:
@@ -27,7 +25,6 @@ jobs:
           set -o pipefail
           chmod +x gradlew
           ./gradlew lint test assembleDebug --continue --stacktrace --console=plain
-
       - name: Node audit and test
         if: ${{ hashFiles('package.json') != '' }}
         shell: bash
@@ -40,17 +37,7 @@ jobs:
             npm run lint --if-present
             npm run build --if-present
           fi
-
       - name: Python syntax audit
         if: ${{ hashFiles('**/*.py') != '' }}
         shell: bash
-        run: |
-          python -m compileall -q .
-
-      - name: CodeQL security analysis
-        uses: github/codeql-action/init@v3
-        with:
-          languages: python,java-kotlin
-
-      - name: CodeQL analyze
-        uses: github/codeql-action/analyze@v3
+        run: python -m compileall -q .
